@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZYgal</title>
+    <!-- Carousel with React and Tailwind CSS-->
+    <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js" crossorigin></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js" crossorigin></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .radial-gradient-text {
+            background: radial-gradient(circle, #3e055f, #f06595, #cc5de8, #845ef7, #5c7cfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-border {
+            border-bottom: 20px solid #3f2bd7;
+        }
+        
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center h-screen bg-black">
+    <h1 class="radial-gradient-text text-4xl font-bold mb-8">UI Interface</h1>
+    <div id="root" class="w-full max-w-xs"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        function App() {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const slidesRef = useRef(null);
+
+            const slides = [
+                <img src="https://cartoonsco-media.s3.amazonaws.com/uploads/2023/05/gecko-vector-thumbnail-CT547663.jpg" alt="Slide 1" className="w-full h-full object-cover" />,
+                <img src="https://cartoonsco-media.s3.amazonaws.com/uploads/2023/04/cat-thief-vector-thumbnail-CT66E8E2.jpg" alt="Slide 2" className="w-full h-full object-cover" />,
+                <img src="https://cartoonsco-media.s3.amazonaws.com/uploads/2023/05/ant-vector-thumbnail-CT436B73.jpg" alt="Slide 3" className="w-full h-full object-cover" />
+            ];
+
+            const handleTouchStart = (e) => {
+                const touch = e.touches[0];
+                slidesRef.current.startX = touch.clientX;
+            };
+
+            const handleTouchMove = (e) => {
+                if (!slidesRef.current.startX) return;
+                const touch = e.touches[0];
+                const diffX = touch.clientX - slidesRef.current.startX;
+                if (Math.abs(diffX) > 50) {
+                    if (diffX > 0) {
+                        prevSlide();
+                    } else {
+                        nextSlide();
+                    }
+                    slidesRef.current.startX = null;
+                }
+            };
+
+            const nextSlide = () => {
+                setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
+            };
+
+            const prevSlide = () => {
+                setCurrentSlide((prevSlide) => (prevSlide - 1 + slides.length) % slides.length);
+            };
+
+            useEffect(() => {
+                const slidesElement = slidesRef.current;
+                slidesElement.addEventListener('touchstart', handleTouchStart);
+                slidesElement.addEventListener('touchmove', handleTouchMove);
+
+                return () => {
+                    slidesElement.removeEventListener('touchstart', handleTouchStart);
+                    slidesElement.removeEventListener('touchmove', handleTouchMove);
+                };
+            }, []);
+
+            return (
+                <div className="relative w-full" ref={slidesRef}>
+                    <div className="overflow-hidden rounded-lg shadow-md">
+                        <div className="flex transition-transform duration-500" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+                            {slides.map((slide, index) => (
+                                <div key={index} className="w-full h-64 flex-shrink-0 flex items-center justify-center bg-black text-gray-700 text-lg font-semibold">
+                                    {slide}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex justify-center mt-4">
+                        {slides.map((_, index) => (
+                            <button
+                                key={index}
+                                className={`w-2 h-2 mx-1 rounded-full ${currentSlide === index ? 'bg-green-900' : 'bg-green-100'}`}
+                                onClick={() => setCurrentSlide(index)}
+                            />
+                        ))}
+                    </div>
+                    <div className="mt-4 text-center">
+                        <button className="bg-blue-700 text-white px-4 py-2 rounded" color=''>Static Button</button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
